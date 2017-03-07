@@ -15,14 +15,13 @@ MainWindowCallback (HWND   window,
                     LPARAM lParam)
 {
     LRESULT result = 0;
-    
+ 
     switch(message)
     {
         // Resize
         case WM_SIZE:
         {
             OutputDebugStringA("WM_SIZE\n");
-
             break;
         }
         // Deletes window
@@ -57,6 +56,7 @@ MainWindowCallback (HWND   window,
             static DWORD operation = WHITENESS;  
             PatBlt(deviceContext, x, y, width, height, operation);
 
+
             if(operation == BLACKNESS)
             {
                 operation = WHITENESS;
@@ -66,7 +66,6 @@ MainWindowCallback (HWND   window,
                 operation = BLACKNESS;
             }
               
-            
             EndPaint(window, &paint);
         }
         
