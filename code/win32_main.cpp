@@ -83,27 +83,27 @@ MainWindowCallback (HWND   window,
 
 
 int CALLBACK
-WinMain(HINSTANCE instance,
-        HINSTANCE prevInstance,
-        LPSTR     commandLine,
-        int       showCode)
+WinMain(HINSTANCE Instance,
+        HINSTANCE PrevInstance,
+        LPSTR     CommandLine,
+        int       ShowCode)
 {
-    WNDCLASS windowClass = {};
+    WNDCLASS WindowClass = {};
 
     //TODO(robert): Check if HREDRAW/VREDRAW/OWNDC still matter.
-    windowClass.style = CS_OWNDC|CS_HREDRAW|CS_VREDRAW;
-    windowClass.lpfnWndProc =  MainWindowCallback;
-    windowClass.hInstance = instance;
+    WindowClass.style = CS_OWNDC|CS_HREDRAW|CS_VREDRAW;
+    WindowClass.lpfnWndProc =  MainWindowCallback;
+    WindowClass.hInstance = Instance;
     //WindowClass.hIcon;
-    windowClass.lpszClassName = "C_engineWindowClass";
+    WindowClass.lpszClassName = "C_engineWindowClass";
 
-    int success = RegisterClass(&windowClass);
+    int success = RegisterClass(&WindowClass);
 
     if(success)
     {
         HWND windowHandle = CreateWindowEx(
             0,
-            windowClass.lpszClassName,
+            WindowClass.lpszClassName,
             "C_engineWindowClass",
             WS_OVERLAPPEDWINDOW|WS_VISIBLE,
             CW_USEDEFAULT,
@@ -112,7 +112,7 @@ WinMain(HINSTANCE instance,
             CW_USEDEFAULT,
             0,
             0,
-            instance,
+            Instance,
             0);
 
         if(windowHandle)
