@@ -8,33 +8,58 @@
 
 #include <windows.h>
 
-LRESULT CALLBACK
-MainWindowCallback (HWND   window,
-                    UINT   message,
-                    WPARAM wParam,
-                    LPARAM lParam)
+#define internal static
+#define local_persist static
+#define global_variable static
+
+//TODO(robert): Global for now. Make sure it is clear what can be touched. Global variables no not do that.
+global_variable bool Running;
+
+// Device Independent Bitmap.
+internal void
+Win32_ResizeDIBSection(int Width, int Height)
 {
-    LRESULT result = 0;
+    
+}
+
+internal void
+Win32_UpdateWindow(HWND Window, int X, int Y, int Width, int Height)
+{
+}
+
+LRESULT CALLBACK
+Win32_MainWindowCallback (HWND   Window,
+                    UINT   Message,
+                    WPARAM WParam,
+                    LPARAM LParam)
+{
+    LRESULT Result = 0;
  
-    switch(message)
+    switch(Message)
     {
         // Resize
         case WM_SIZE:
         {
-            OutputDebugStringA("WM_SIZE\n");
+            RECT ClientRect;
+            GetClientRect(Window, &ClientRect);
+            int Width = ClientRect.right - ClientRect.left;
+            int Height = ClientRect.bottom - ClientRect.top;
+            Win32_ResizeDIBSection(Width, Height);
             break;
         }
         // Deletes window
         case WM_DESTROY:
         {
-            OutputDebugStringA("WM_DESTROY\n");
+            //TODO(robert): Handle as error and re-create window?
+            Running = false;
             break;
         }
 
         // Close
         case WM_CLOSE:
         {
-            OutputDebugStringA("WM_CLOSE\n");
+            //TODO(robert): Handle with msg to user.
+            Running = false;
             break;
         }
 
@@ -47,37 +72,24 @@ MainWindowCallback (HWND   window,
 
         case WM_PAINT:
         {
-            PAINTSTRUCT paint;
-            HDC deviceContext = BeginPaint(window, &paint);
-            int x = paint.rcPaint.left;
-            int y = paint.rcPaint.top;
-            LONG height = paint.rcPaint.bottom - paint.rcPaint.top;
-            LONG width = paint.rcPaint.right - paint.rcPaint.left;
-            static DWORD operation = WHITENESS;  
-            PatBlt(deviceContext, x, y, width, height, operation);
-
-
-            if(operation == BLACKNESS)
-            {
-                operation = WHITENESS;
-            }
-            else
-            {
-                operation = BLACKNESS;
-            }
-              
-            EndPaint(window, &paint);
+            PAINTSTRUCT Paint;
+            HDC DeviceContext = BeginPaint(Window, &Paint);
+            int X = Paint.rcPaint.left;
+            int Y = Paint.rcPaint.top;
+            LONG Height = Paint.rcPaint.bottom - Paint.rcPaint.top;
+            LONG Width = Paint.rcPaint.right - Paint.rcPaint.left;
+            Win32_UpdateWindow(Window, X, Y, Width, Height);
+            EndPaint(Window, &Paint);
         }
         
         default:
         {
-            //   OutputDebugStringA("default\n");
-            result = DefWindowProc(window, message, wParam, lParam);
+            Result = DefWindowProc(Window, Message, WParam, LParam);
             break;
         };
     }
 
-    return result;
+    return Result;
     
 }
 
@@ -92,7 +104,7 @@ WinMain(HINSTANCE Instance,
 
     //TODO(robert): Check if HREDRAW/VREDRAW/OWNDC still matter.
     WindowClass.style = CS_OWNDC|CS_HREDRAW|CS_VREDRAW;
-    WindowClass.lpfnWndProc =  MainWindowCallback;
+    WindowClass.lpfnWndProc =  Win32_MainWindowCallback;
     WindowClass.hInstance = Instance;
     //WindowClass.hIcon;
     WindowClass.lpszClassName = "C_engineWindowClass";
@@ -117,17 +129,16 @@ WinMain(HINSTANCE Instance,
 
         if(windowHandle)
         {
-            MSG message;
-
-            for(;;)
+            Running = true;
+            while(Running)
             {
-                BOOL msgResult = GetMessage(&message, 0, 0, 0);
+                MSG Message;
+                BOOL MsgResult = GetMessage(&Message, 0, 0, 0);
 
-                if(msgResult > 0)
+                if(MsgResult > 0)
                 {
-                    TranslateMessage(&message);
-
-                    DispatchMessage(&message);
+                    TranslateMessage(&Message);
+                    DispatchMessage(&Message);
                 }
                 else
                 {
